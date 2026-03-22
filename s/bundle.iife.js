@@ -306,11 +306,15 @@
   // ---------- MAP INIT ----------
   function makeMap(styleUrl) {
     const hv = CFG.homeView;
+    const isMobile = window.innerWidth <= 768;
+    const pad = isMobile
+      ? { top: 40, right: 20, bottom: 160, left: 20 }
+      : hv.padding;
     const map = new maplibregl.Map({
       container: "trip-map",
       style: styleUrl,
       bounds: hv.bounds,
-      fitBoundsOptions: { padding: hv.padding, maxZoom: hv.maxZoom, duration: 0 },
+      fitBoundsOptions: { padding: pad, maxZoom: hv.maxZoom, duration: 0 },
       dragRotate: false, pitchWithRotate: false
     });
 
@@ -474,10 +478,13 @@
         gap: 12px;
         padding: 14px 16px;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: background 0.2s, opacity 0.05s;
         position: relative;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
       .trip-stop:hover { background: rgba(0,0,0,0.05); }
+      .trip-stop:active { opacity: 0.7; }
       .trip-stop.active { background: ${theme.red}; }
       
       /* Stop number circle */
@@ -682,6 +689,19 @@
         .maplibregl-ctrl-top-right {
           top: 12px !important;
           right: 12px !important;
+        }
+
+        /* Scroll indicator: right-edge fade on horizontal sidebar */
+        #trip-sidebar::after {
+          content: '';
+          position: sticky;
+          right: 0;
+          top: 0;
+          flex-shrink: 0;
+          width: 24px;
+          min-height: 100%;
+          background: linear-gradient(to left, rgba(244,237,228,0.95), transparent);
+          pointer-events: none;
         }
       }
       
