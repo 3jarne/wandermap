@@ -1,0 +1,51 @@
+{
+  "maptiler": {
+    "key": "PGWEY6eweJyLp2h6U2Hj",
+    "mapId": "01992c70-b269-7a66-af7e-a3da0109a2bb"
+  },
+  "icons": {
+    "root": "https://www.wanderflur.com/s/",
+    "iconSize": 16,
+    "badgeSize": 32
+  },
+  "colors": {
+    "route": "#A67B39",
+    "currentDot": "#8E3637",
+    "pill": {
+      "fg": "#FFFFFF",
+      "fill": "#79494A",
+      "stroke": "transparent"
+    },
+    "pillCurrent": {
+      "fg": "#FFFFFF",
+      "fill": "#79494A",
+      "stroke": "transparent"
+    }
+  },
+  "pill": {
+    "fontSize": 16,
+    "padX": 16,
+    "padY": 8,
+    "radius": 999
+  },
+  "idleMs": 10000,
+  "homeView": {
+    "bounds": [
+      [
+        90.0,
+        -12.0
+      ],
+      [
+        150.0,
+        50.0
+      ]
+    ],
+    "padding": {
+      "top": 60,
+      "right": 200,
+      "bottom": 60,
+      "left": 200
+    },
+    "maxZoom": 6.5
+  }
+}

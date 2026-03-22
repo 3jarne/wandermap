@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<!-- Antigravity Test Change -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WanderFlur Trip Editor</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f0f0f;
+            color: #e5e5e5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Editor Panel */
+        #editor {
+            width: 400px;
+            background: #171717;
+            border-right: 1px solid #262626;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #editor h1 {
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #1c1c1c;
+            border-bottom: 1px solid #262626;
+            color: #fafafa;
+        }
+
+        #stops-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        /* Location Stop Item */
+        .stop-item {
+            background: #1c1c1c;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #262626;
+            transition: border-color 0.2s;
+        }
+
+        .stop-item:hover {
+            border-color: #404040;
+        }
+
+        .stop-item.current {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+
+        .stop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .stop-name {
+            font-weight: 500;
+            color: #fafafa;
+            font-size: 14px;
+        }
+
+        .stop-item.current .stop-name {
+            color: #60a5fa;
+        }
+
+        .stop-dates {
+            font-size: 12px;
+            color: #737373;
+        }
+
+        .stop-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .stop-actions button {
+            background: none;
+            border: none;
+            color: #525252;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 12px;
+        }
+
+        .stop-actions button:hover {
+            color: #a3a3a3;
+        }
+
+        .stop-actions button.delete:hover {
+            color: #ef4444;
+        }
+
+        /* Transport Item (between stops) */
+        .transport-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+            margin: 4px 0;
+        }
+
+        .transport-connector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .transport-connector:hover {
+            border-color: #404040;
+            background: #1f1f1f;
+        }
+
+        .transport-icon {
+            font-size: 16px;
+        }
+
+        .transport-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .transport-line {
+            flex: 1;
+            height: 1px;
+            background: #333;
+        }
+
+        /* Transport Dropdown */
+        .transport-dropdown {
+            position: relative;
+        }
+
+        .transport-options {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 4px;
+            z-index: 100;
+            margin-top: 4px;
+        }
+
+        .transport-options.show {
+            display: flex;
+            gap: 4px;
+        }
+
+        .transport-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+
+        .transport-option:hover {
+            background: #2a2a2a;
+        }
+
+        /* Add Stop Form */
+        #add-form {
+            background: #2a2a2a;
+            padding: 16px;
+            border-top: 1px solid #333;
+        }
+
+        #add-form h3 {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .form-row {
+            margin-bottom: 12px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .date-row>div {
+            flex: 1;
+        }
+
+        #city-search {
+            position: relative;
+        }
+
+        #city-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        #city-results.show {
+            display: block;
+        }
+
+        .city-result {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+        }
+
+        .city-result:hover {
+            background: #2a2a2a;
+        }
+
+        .city-result:last-child {
+            border-bottom: none;
+        }
+
+        .city-result-name {
+            color: #e5e5e5;
+        }
+
+        .city-result-country {
+            font-size: 12px;
+            color: #666;
+        }
+
+        #add-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #add-btn:hover {
+            background: #2563eb;
+        }
+
+        #add-btn:disabled {
+            background: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        /* Theme Section */
+        #theme-section {
+            background: #222;
+            padding: 12px 16px;
+            border-top: 1px solid #333;
+        }
+
+        #theme-section h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .theme-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .theme-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .theme-row label {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .theme-row input[type="color"] {
+            width: 40px;
+            height: 28px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        /* Export Section */
+        #export-section {
+            background: #222;
+            padding: 12px 16px;
+            border-top: 1px solid #333;
+        }
+
+        /* Add Modal */
+        #add-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #add-modal.show {
+            display: flex;
+        }
+
+        #add-modal-content {
+            background: #2a2a2a;
+            padding: 24px;
+            border-radius: 12px;
+            width: 380px;
+            max-width: 90%;
+        }
+
+        #add-modal h3 {
+            margin-bottom: 16px;
+            color: #F9B54D;
+            font-size: 18px;
+        }
+
+        #add-modal .form-row {
+            margin-bottom: 14px;
+        }
+
+        #add-modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        #add-modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        #add-save {
+            background: #F9B54D;
+            color: #111;
+        }
+
+        #add-save:disabled {
+            background: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        #add-cancel {
+            background: #444;
+            color: #fff;
+        }
+
+        #copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #8E3637;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #copy-btn:hover {
+            background: #a64445;
+        }
+
+        #copy-btn.copied {
+            background: #4a9;
+        }
+
+        /* Map Panel */
+        #map-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #map-header {
+            padding: 16px;
+            background: #222;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #map-header h2 {
+            font-size: 16px;
+            color: #888;
+        }
+
+        #wf-map-wrap {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #trip-map {
+            width: 100%;
+            height: 520px;
+            border-radius: 25px;
+        }
+
+        /* Preview toggle buttons */
+        #preview-toggle {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+            margin-right: 16px;
+        }
+
+        #preview-toggle button {
+            padding: 6px 12px;
+            border: 1px solid #333;
+            background: #1c1c1c;
+            color: #888;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        #preview-toggle button:hover {
+            background: #262626;
+            color: #ccc;
+        }
+
+        #preview-toggle button.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+
+        /* Mobile preview mode */
+        #wf-map-wrap.mobile-mode {
+            width: 375px;
+            margin: 0 auto;
+        }
+
+        #wf-map-wrap.mobile-mode #trip-map {
+            height: 600px;
+        }
+
+        /* Edit Modal */
+        #edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #edit-modal.show {
+            display: flex;
+        }
+
+        #edit-modal-content {
+            background: #2a2a2a;
+            padding: 24px;
+            border-radius: 12px;
+            width: 360px;
+            max-width: 90%;
+        }
+
+        #edit-modal h3 {
+            margin-bottom: 16px;
+            color: #F9B54D;
+        }
+
+        #edit-modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        #edit-modal-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        #edit-save {
+            background: #F9B54D;
+            color: #111;
+        }
+
+        #edit-cancel {
+            background: #444;
+            color: #fff;
+        }
+
+        /* Edit modal city search */
+        #edit-city-search {
+            position: relative;
+        }
+
+        #edit-location-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        #edit-city-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        #edit-city-results.show {
+            display: block;
+        }
+
+        #edit-city-results .city-result {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+        }
+
+        #edit-city-results .city-result:last-child {
+            border-bottom: none;
+        }
+
+        #edit-city-results .city-result:hover {
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Editor Panel -->
+    <div id="editor">
+        <h1>🗺️ WanderFlur Trip Editor</h1>
+
+        <div id="stops-list"></div>
+
+        <!-- Theme Editor -->
+        <div id="theme-section">
+            <h3>🎨 Theme Colors</h3>
+            <div class="theme-row">
+                <label>Route & Labels</label>
+                <input type="color" id="theme-gold" value="#FFB12D">
+            </div>
+            <div class="theme-row">
+                <label>Current Location</label>
+                <input type="color" id="theme-red" value="#A64C4F">
+            </div>
+            <div class="theme-row">
+                <label>Sidebar Accent</label>
+                <input type="color" id="theme-dark-red" value="#79494A">
+            </div>
+        </div>
+
+        <div id="export-section">
+            <button id="copy-btn">📋 Copy Embed Code</button>
+            <button id="reset-btn"
+                style="width:100%; margin-top:8px; padding:10px; background:#444; color:#aaa; border:none; border-radius:6px; font-family:inherit; cursor:pointer;">🔄
+                Reset to Defaults</button>
+        </div>
+    </div>
+
+    <!-- Map Preview -->
+    <div id="map-container">
+        <div id="map-header">
+            <h2>Live Preview</h2>
+            <div id="preview-toggle">
+                <button id="toggle-desktop" class="active" onclick="setPreviewMode('desktop')">🖥 Desktop</button>
+                <button id="toggle-mobile" onclick="setPreviewMode('mobile')">📱 Mobile</button>
+            </div>
+            <span id="stop-count"></span>
+        </div>
+        <div id="wf-map-wrap">
+            <div id="trip-map"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal">
+        <div id="edit-modal-content">
+            <h3>Edit Stop</h3>
+            <div class="form-row" id="edit-city-search">
+                <label>Location</label>
+                <input type="text" id="edit-location-input" placeholder="Search new location..." autocomplete="off">
+                <div id="edit-city-results"></div>
+            </div>
+            <div class="form-row">
+                <label>Display Name</label>
+                <input type="text" id="edit-name">
+            </div>
+            <div class="form-row date-row">
+                <div>
+                    <label>Arrive</label>
+                    <input type="date" id="edit-arrive">
+                </div>
+                <div>
+                    <label>Depart</label>
+                    <input type="date" id="edit-depart">
+                </div>
+            </div>
+            <div id="edit-modal-actions">
+                <button id="edit-cancel">Cancel</button>
+                <button id="edit-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div id="add-modal">
+        <div id="add-modal-content">
+            <h3>+ Add New Stop</h3>
+            <div class="form-row">
+                <label>Arrived by</label>
+                <select id="transport-input"
+                    style="width:100%; padding:10px 12px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:#f0f0f0; font-family:inherit; font-size:14px;">
+                    <option value="plane">✈️ Plane</option>
+                    <option value="train">🚂 Train</option>
+                    <option value="car">🚗 Car</option>
+                    <option value="boat">⛵ Boat</option>
+                    <option value="bus">🚌 Bus</option>
+                </select>
+            </div>
+            <div class="form-row" id="city-search">
+                <label>Location</label>
+                <input type="text" id="city-input" placeholder="Search city..." autocomplete="off">
+                <div id="city-results"></div>
+            </div>
+            <div class="form-row">
+                <label>Display Name</label>
+                <input type="text" id="custom-name-input" placeholder="Custom name (optional)"
+                    style="width:100%; padding:10px 12px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:#f0f0f0; font-family:inherit; font-size:14px;">
+            </div>
+            <div class="form-row date-row">
+                <div>
+                    <label>Arrive</label>
+                    <input type="date" id="arrive-input">
+                </div>
+                <div>
+                    <label>Depart</label>
+                    <input type="date" id="depart-input">
+                </div>
+            </div>
+            <div id="add-modal-actions">
+                <button id="add-cancel">Cancel</button>
+                <button id="add-save" disabled>Add Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Libraries -->
+    <script src="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.js"></script>
+
+    <script>
+        // =====================================================
+        // STATE
+        // =====================================================
+        let stops = null; // Will be initialized from localStorage or stops.json
+        let selectedCity = null;
+        let editingIndex = null;
+        let map = null;
+        let searchTimeout = null;
+        let openTransportDropdown = null;
+
+        // Transport icons
+        const TRANSPORT_ICONS = {
+            plane: '✈️',
+            train: '🚂',
+            car: '🚗',
+            boat: '⛵',
+            bus: '🚌'
+        };
+
+        // Norwegian month names
+        const MONTHS_NO = ['JAN', 'FEB', 'MAR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DES'];
+
+        // Format date to Norwegian: "1. JAN 2026"
+        function formatDateNO(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const day = d.getDate();
+            const month = MONTHS_NO[d.getMonth()];
+            const year = d.getFullYear();
+            return `${day}. ${month} ${year}`;
+        }
+
+        // Storage keys
+        const STORAGE_KEY = 'wanderflur_trip_stops';
+        const THEME_STORAGE_KEY = 'wanderflur_theme';
+
+        // Default theme colors
+        const DEFAULT_THEME = {
+            gold: '#FFB12D',
+            red: '#A64C4F',
+            darkRed: '#79494A'
+        };
+
+        // Current theme (loaded from localStorage or defaults)
+        let currentTheme = { ...DEFAULT_THEME };
+
+        // Load theme from localStorage
+        function loadTheme() {
+            try {
+                const saved = localStorage.getItem(THEME_STORAGE_KEY);
+                if (saved) {
+                    return { ...DEFAULT_THEME, ...JSON.parse(saved) };
+                }
+            } catch (e) {
+                console.warn('Could not load saved theme:', e);
+            }
+            return { ...DEFAULT_THEME };
+        }
+
+        // Save theme to localStorage
+        function saveTheme() {
+            try {
+                localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(currentTheme));
+            } catch (e) {
+                console.warn('Could not save theme:', e);
+            }
+        }
+
+        // Load stops from localStorage (synced with stops.json on reset)
+        function loadStops() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {
+                console.warn('Could not load saved stops:', e);
+            }
+            return null; // Will trigger load from stops.json
+        }
+
+        // Save stops to localStorage and sync to local disk if server is running
+        async function saveStops() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(stops));
+
+                // Sync to local stops.json via helper server
+                fetch('/api/save', {
+                    method: 'POST',
+                    body: JSON.stringify(stops, null, 2)
+                }).catch(err => console.debug('Server sync skipped (manual mode)'));
+
+            } catch (e) {
+                console.warn('Could not save stops:', e);
+            }
+        }
+
+        // Reset to defaults by loading from stops.json
+        async function resetToDefaults() {
+            if (confirm('Reset all stops to the original data from stops.json?')) {
+                try {
+                    const res = await fetch('./stops.json');
+                    const data = await res.json();
+                    stops = data;
+                    saveStops();
+                    renderStops();
+                    refreshMap();
+                } catch (e) {
+                    console.error('Could not load stops.json:', e);
+                    alert('Failed to load stops.json');
+                }
+            }
+        }
+
+        // Initial load - try localStorage first, then stops.json
+        stops = loadStops();
+        currentTheme = loadTheme();
+
+        // If no localStorage data, load from stops.json
+        async function initializeStops() {
+            if (!stops) {
+                try {
+                    const res = await fetch('./stops.json');
+                    stops = await res.json();
+                    saveStops(); // Cache in localStorage
+                } catch (e) {
+                    console.error('Could not load stops.json:', e);
+                    stops = []; // Empty fallback
+                }
+            }
+
+            // Initialize theme color pickers
+            document.getElementById('theme-gold').value = currentTheme.gold;
+            document.getElementById('theme-red').value = currentTheme.red;
+            document.getElementById('theme-dark-red').value = currentTheme.darkRed;
+
+            // Add theme change listeners
+            document.getElementById('theme-gold').addEventListener('input', (e) => {
+                currentTheme.gold = e.target.value;
+                saveTheme();
+                refreshMap();
+            });
+            document.getElementById('theme-red').addEventListener('input', (e) => {
+                currentTheme.red = e.target.value;
+                saveTheme();
+                refreshMap();
+            });
+            document.getElementById('theme-dark-red').addEventListener('input', (e) => {
+                currentTheme.darkRed = e.target.value;
+                saveTheme();
+                refreshMap();
+            });
+
+            renderStops();
+            refreshMap();
+        }
+
+        // =====================================================
+        // DOM ELEMENTS
+        // =====================================================
+        const stopsList = document.getElementById('stops-list');
+        const cityInput = document.getElementById('city-input');
+        const cityResults = document.getElementById('city-results');
+        const arriveInput = document.getElementById('arrive-input');
+        const departInput = document.getElementById('depart-input');
+        const addModal = document.getElementById('add-modal');
+        const addSaveBtn = document.getElementById('add-save');
+        const copyBtn = document.getElementById('copy-btn');
+        const stopCount = document.getElementById('stop-count');
+        const editModal = document.getElementById('edit-modal');
+        const editLocationInput = document.getElementById('edit-location-input');
+        const editCityResults = document.getElementById('edit-city-results');
+
+        let editSelectedLocation = null; // For tracking location changes in edit modal
+
+        // =====================================================
+        // CITY SEARCH (Nominatim)
+        // =====================================================
+        cityInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            selectedCity = null;
+            updateAddBtn();
+
+            if (searchTimeout) clearTimeout(searchTimeout);
+
+            if (query.length < 2) {
+                cityResults.classList.remove('show');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => searchCity(query), 300);
+        });
+
+        async function searchCity(query) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+                const res = await fetch(url, {
+                    headers: { 'User-Agent': 'WanderFlur-TripEditor/1.0' }
+                });
+                const data = await res.json();
+
+                cityResults.innerHTML = '';
+
+                if (data.length === 0) {
+                    cityResults.innerHTML = '<div class="city-result"><span class="city-result-name">No results found</span></div>';
+                } else {
+                    data.forEach(place => {
+                        const addr = place.address || {};
+                        // Get the most specific location name
+                        const cityName = addr.city || addr.town || addr.village || addr.hamlet || place.name;
+                        // Get state/region for disambiguation (e.g., Bali vs Lombok)
+                        const state = addr.state || addr.county || addr.region || '';
+                        const country = addr.country || '';
+
+                        // Build display name with region for clarity
+                        let displayParts = [cityName];
+                        if (state && state !== cityName) displayParts.push(state);
+                        if (country) displayParts.push(country);
+                        const displayName = displayParts.join(', ');
+
+                        // Build shorter name for storage (city + country)
+                        const storedName = country ? `${cityName}, ${state ? state + ', ' : ''}${country}` : cityName;
+
+                        const div = document.createElement('div');
+                        div.className = 'city-result';
+                        div.innerHTML = `
+                            <span class="city-result-name">${cityName}</span>
+                            ${state || country ? `<span class="city-result-country">${state ? ', ' + state : ''}${country ? ', ' + country : ''}</span>` : ''}
+                        `;
+                        div.onclick = () => selectCity(storedName, parseFloat(place.lat), parseFloat(place.lon));
+                        cityResults.appendChild(div);
+                    });
+                }
+
+                cityResults.classList.add('show');
+            } catch (err) {
+                console.error('Search error:', err);
+            }
+        }
+
+        function selectCity(name, lat, lon) {
+            selectedCity = { name, lat, lon };
+            cityInput.value = selectedCity.name;
+            cityResults.classList.remove('show');
+
+            // Prefill the custom name with the location name
+            document.getElementById('custom-name-input').value = name;
+
+            updateAddBtn();
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#city-search')) {
+                cityResults.classList.remove('show');
+            }
+            // Close transport dropdown when clicking elsewhere
+            if (!e.target.closest('.transport-dropdown')) {
+                document.querySelectorAll('.transport-options.show').forEach(el => el.classList.remove('show'));
+                openTransportDropdown = null;
+            }
+        });
+
+        // =====================================================
+        // ADD STOP
+        // =====================================================
+        function updateAddBtn() {
+            addSaveBtn.disabled = !selectedCity;
+        }
+
+        // Open add modal
+        function openAddModal() {
+            // Reset form
+            cityInput.value = '';
+            departInput.value = '';
+            document.getElementById('transport-input').value = 'plane';
+            document.getElementById('custom-name-input').value = '';
+            selectedCity = null;
+            updateAddBtn();
+
+            // Prefill arrive date from previous stop's depart date
+            if (stops.length > 0) {
+                const lastStop = stops[stops.length - 1];
+                arriveInput.value = lastStop.depart || '';
+            } else {
+                arriveInput.value = '';
+            }
+
+            addModal.classList.add('show');
+            document.getElementById('transport-input').focus();
+        }
+
+        // Cancel add
+        document.getElementById('add-cancel').addEventListener('click', () => {
+            addModal.classList.remove('show');
+        });
+
+        // Save new stop
+        addSaveBtn.addEventListener('click', () => {
+            if (!selectedCity) return;
+
+            // Use custom name if provided, otherwise use the city name
+            const customName = document.getElementById('custom-name-input').value.trim();
+            const displayName = customName || selectedCity.name;
+
+            const newStop = {
+                name: displayName,
+                lon: selectedCity.lon,
+                lat: selectedCity.lat,
+                arrive: arriveInput.value || '',
+                depart: departInput.value || '',
+                to: document.getElementById('transport-input').value
+            };
+
+            stops.push(newStop);
+            saveStops();
+
+            // Close modal
+            addModal.classList.remove('show');
+
+            renderStops();
+            refreshMap();
+        });
+
+        // =====================================================
+        // PREVIEW MODE TOGGLE
+        // =====================================================
+        function setPreviewMode(mode) {
+            const wrap = document.getElementById('wf-map-wrap');
+            const tripMap = document.getElementById('trip-map');
+            const desktopBtn = document.getElementById('toggle-desktop');
+            const mobileBtn = document.getElementById('toggle-mobile');
+
+            if (mode === 'mobile') {
+                wrap.classList.add('mobile-mode');
+                tripMap.classList.add('mobile-preview');
+                desktopBtn.classList.remove('active');
+                mobileBtn.classList.add('active');
+            } else {
+                wrap.classList.remove('mobile-mode');
+                tripMap.classList.remove('mobile-preview');
+                desktopBtn.classList.add('active');
+                mobileBtn.classList.remove('active');
+            }
+
+            // Trigger map resize and scroll to active stop after layout change
+            setTimeout(() => {
+                if (window.maplibregl && tripMap._map) {
+                    tripMap._map.resize();
+                }
+
+                // Scroll to active stop in sidebar
+                const sidebar = document.getElementById('trip-sidebar');
+                if (sidebar) {
+                    const activeStop = sidebar.querySelector('.trip-stop.active');
+                    if (activeStop) {
+                        activeStop.scrollIntoView({
+                            block: mode === 'mobile' ? 'nearest' : 'center',
+                            inline: mode === 'mobile' ? 'center' : 'nearest',
+                            behavior: 'instant'
+                        });
+                    }
+                }
+            }, 150);
+        }
+
+        // =====================================================
+        // RENDER STOPS LIST
+        // =====================================================
+        function renderStops() {
+            const currentIdx = stops.length - 1;
+            stopCount.textContent = `${stops.length} stops`;
+
+            let html = '';
+            stops.forEach((stop, idx) => {
+                // Location item
+                const dateRange = stop.arrive || stop.depart
+                    ? `${formatDateNO(stop.arrive)}${stop.arrive && stop.depart ? ' → ' : ''}${formatDateNO(stop.depart)}`
+                    : '';
+
+                html += `
+                <div class="stop-item ${idx === currentIdx ? 'current' : ''}" data-idx="${idx}">
+                    <div class="stop-header">
+                        <span class="stop-name">${stop.name}</span>
+                        <div class="stop-actions">
+                            <button onclick="editStop(${idx})" title="Edit">✏️</button>
+                            <button class="delete" onclick="deleteStop(${idx})" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                    ${dateRange ? `<div class="stop-dates">${dateRange}</div>` : ''}
+                </div>
+                `;
+
+                // Transport connector (except after the last stop)
+                if (idx < stops.length - 1) {
+                    html += `
+                    <div class="transport-item">
+                        <span class="transport-line"></span>
+                        <div class="transport-dropdown">
+                            <div class="transport-connector" onclick="toggleTransport(${idx})">
+                                <span class="transport-icon">${TRANSPORT_ICONS[stop.to] || '✈️'}</span>
+                                <span class="transport-label">${stop.to}</span>
+                            </div>
+                            <div class="transport-options" id="transport-options-${idx}">
+                                ${Object.entries(TRANSPORT_ICONS).map(([key, icon]) =>
+                        `<div class="transport-option" onclick="setTransport(${idx}, '${key}')">${icon}</div>`
+                    ).join('')}
+                            </div>
+                        </div>
+                        <span class="transport-line"></span>
+                    </div>
+                    `;
+                }
+            });
+
+            // Add "+ Add New Stop" button at the end of the timeline
+            html += `
+            <div class="transport-item" style="padding: 12px 0;">
+                <button onclick="openAddModal()" style="
+                    width: 100%;
+                    padding: 12px;
+                    background: transparent;
+                    border: 2px dashed #444;
+                    border-radius: 8px;
+                    color: #888;
+                    font-family: inherit;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                " onmouseover="this.style.borderColor='#F9B54D'; this.style.color='#F9B54D';" onmouseout="this.style.borderColor='#444'; this.style.color='#888';">+ Add New Stop</button>
+            </div>
+            `;
+
+            stopsList.innerHTML = html;
+
+            // Auto-scroll to bottom (latest stop)
+            stopsList.scrollTop = stopsList.scrollHeight;
+        }
+
+        // Make openAddModal available globally
+        window.openAddModal = openAddModal;
+
+        // =====================================================
+        // TRANSPORT SELECTION
+        // =====================================================
+        window.toggleTransport = function (idx) {
+            const options = document.getElementById(`transport-options-${idx}`);
+            const wasOpen = options.classList.contains('show');
+
+            // Close all dropdowns
+            document.querySelectorAll('.transport-options.show').forEach(el => el.classList.remove('show'));
+
+            if (!wasOpen) {
+                options.classList.add('show');
+                openTransportDropdown = idx;
+            } else {
+                openTransportDropdown = null;
+            }
+        };
+
+        window.setTransport = function (idx, transport) {
+            stops[idx].to = transport;
+            saveStops();
+            document.querySelectorAll('.transport-options.show').forEach(el => el.classList.remove('show'));
+            openTransportDropdown = null;
+            renderStops();
+            refreshMap();
+        };
+
+        // =====================================================
+        // EDIT & DELETE
+        // =====================================================
+        let editSearchTimeout = null;
+
+        window.editStop = function (idx) {
+            editingIndex = idx;
+            const stop = stops[idx];
+
+            // Reset edit location tracking
+            editSelectedLocation = null;
+            editLocationInput.value = '';
+            editLocationInput.placeholder = `Current: ${stop.name}`;
+            editCityResults.classList.remove('show');
+
+            document.getElementById('edit-name').value = stop.name;
+            document.getElementById('edit-arrive').value = stop.arrive || '';
+            document.getElementById('edit-depart').value = stop.depart || '';
+
+            editModal.classList.add('show');
+        };
+
+        // Edit modal location search
+        editLocationInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+
+            if (editSearchTimeout) clearTimeout(editSearchTimeout);
+
+            if (query.length < 2) {
+                editCityResults.classList.remove('show');
+                return;
+            }
+
+            editSearchTimeout = setTimeout(() => searchEditLocation(query), 300);
+        });
+
+        async function searchEditLocation(query) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+                const res = await fetch(url, {
+                    headers: { 'User-Agent': 'WanderFlur-TripEditor/1.0' }
+                });
+                const data = await res.json();
+
+                editCityResults.innerHTML = '';
+
+                if (data.length === 0) {
+                    editCityResults.innerHTML = '<div class="city-result"><span class="city-result-name">No results found</span></div>';
+                } else {
+                    data.forEach(place => {
+                        const addr = place.address || {};
+                        const cityName = addr.city || addr.town || addr.village || addr.hamlet || place.name;
+                        const state = addr.state || addr.county || addr.region || '';
+                        const country = addr.country || '';
+                        const storedName = country ? `${cityName}, ${state ? state + ', ' : ''}${country}` : cityName;
+
+                        const div = document.createElement('div');
+                        div.className = 'city-result';
+                        div.innerHTML = `
+                            <span class="city-result-name">${cityName}</span>
+                            ${state || country ? `<span class="city-result-country">${state ? ', ' + state : ''}${country ? ', ' + country : ''}</span>` : ''}
+                        `;
+                        div.onclick = () => selectEditLocation(storedName, parseFloat(place.lat), parseFloat(place.lon));
+                        editCityResults.appendChild(div);
+                    });
+                }
+
+                editCityResults.classList.add('show');
+            } catch (err) {
+                console.error('Edit search error:', err);
+            }
+        }
+
+        function selectEditLocation(name, lat, lon) {
+            editSelectedLocation = { name, lat, lon };
+            editLocationInput.value = name;
+            editCityResults.classList.remove('show');
+
+            // Also update the display name field
+            document.getElementById('edit-name').value = name;
+        }
+
+        // Close edit search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#edit-city-search')) {
+                editCityResults.classList.remove('show');
+            }
+        });
+
+        window.deleteStop = function (idx) {
+            if (confirm(`Delete "${stops[idx].name}"?`)) {
+                stops.splice(idx, 1);
+                saveStops();
+                renderStops();
+                refreshMap();
+            }
+        };
+
+        document.getElementById('edit-cancel').onclick = () => {
+            editModal.classList.remove('show');
+            editingIndex = null;
+            editSelectedLocation = null;
+        };
+
+        document.getElementById('edit-save').onclick = () => {
+            if (editingIndex === null) return;
+
+            // Update location if a new one was selected
+            if (editSelectedLocation) {
+                stops[editingIndex].lat = editSelectedLocation.lat;
+                stops[editingIndex].lon = editSelectedLocation.lon;
+            }
+
+            stops[editingIndex].name = document.getElementById('edit-name').value;
+            stops[editingIndex].arrive = document.getElementById('edit-arrive').value;
+            stops[editingIndex].depart = document.getElementById('edit-depart').value;
+            saveStops();
+
+            editModal.classList.remove('show');
+            editingIndex = null;
+            editSelectedLocation = null;
+            renderStops();
+            refreshMap();
+        };
+
+        // =====================================================
+        // EXPORT
+        // =====================================================
+        copyBtn.addEventListener('click', () => {
+            const json = JSON.stringify(stops, null, 2);
+
+            // Use current theme colors in embed code
+            const themeGold = currentTheme.gold;
+            const themeRed = currentTheme.red;
+
+            // Generate full Squarespace embed code
+            const embedCode = `<style>
+  .sqs-block-code:has(#trip-map),
+  .sqs-block-code:has(#trip-map) .sqs-block-content { padding:0!important; margin:0!important; min-height:0!important; }
+  .sqs-section:has(#trip-map) { padding-top:0!important; padding-bottom:0!important; }
+  #wf-map-wrap { width:100%; height: 520px; position: relative; overflow: hidden; }
+  #trip-map    { width:100%; height:100%; border-radius: 25px; }
+</style>
+
+<div id="wf-map-wrap">
+  <div id="trip-map"></div>
+</div>
+<div id="trip-map-status" style="font:14px/1.4 'IBM Plex Mono',monospace;margin-top:6px;"></div>
+
+<!-- Inline CONFIG -->
+<script type="application/json" id="trip-config">
+{
+  "maptiler": { "key": "PGWEY6eweJyLp2h6U2Hj", "mapId": "01992c70-b269-7a66-af7e-a3da0109a2bb" },
+  "icons": { "root": "/s/", "iconSize": 16, "badgeSize": 32 },
+  "theme": {
+    "gold": "${themeGold}",
+    "red": "${themeRed}",
+    "darkRed": "${currentTheme.darkRed}"
+  },
+  "colors": {
+    "route": "${themeGold}", "currentDot": "${themeRed}",
+    "pill": { "fg": "#111111", "fill": "${themeGold}", "stroke": "transparent" },
+    "pillCurrent": { "fg": "#FFFFFF", "fill": "${themeRed}", "stroke": "transparent" }
+  },
+  "pill": { "fontSize": 16, "padX": 16, "padY": 8, "radius": 999 },
+  "pulse": { "speedMs": 1500, "maxScale": 3, "baseRadiusPx": 4, "alpha": 0.4 },
+  "idleMs": 10000,
+  "homeView": { "bounds": [[90,-12],[150,50]], "padding": { "top":60,"right":200,"bottom":60,"left":200 }, "maxZoom": 6.5 }
+}
+<\/script>
+
+<!-- Bridge -->
+<script>
+  (function(){
+    var el = document.getElementById('trip-config');
+    if (!el) return;
+    try {
+      var cfg = JSON.parse(el.textContent || "{}");
+      window.TRIPMAP_CONFIG = {
+        MAPTILER_KEY: (cfg.maptiler && cfg.maptiler.key) || "",
+        MAP_ID:       (cfg.maptiler && cfg.maptiler.mapId) || ""
+      };
+      window.__TRIP_INLINE_CONFIG__ = cfg;
+    } catch(e){}
+  })();
+<\/script>
+
+<!-- Inline STOPS -->
+<script type="application/json" id="trip-stops">
+${json}
+<\/script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.js"><\/script>
+
+<!-- Bundle -->
+<script src="/s/bundleiife.js"><\/script>`;
+
+            navigator.clipboard.writeText(embedCode).then(() => {
+                copyBtn.textContent = '\u2705 Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.textContent = '\ud83d\udccb Copy Embed Code';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', resetToDefaults);
+
+        // =====================================================
+        // MAP SETUP
+        // =====================================================
+        // Load config - using currentTheme for colors
+        function getCFG() {
+            return {
+                maptiler: { key: "PGWEY6eweJyLp2h6U2Hj", mapId: "01992c70-b269-7a66-af7e-a3da0109a2bb" },
+                icons: { root: "./s/", iconSize: 16, badgeSize: 32 },
+                theme: currentTheme,
+                colors: {
+                    route: currentTheme.gold,
+                    currentDot: currentTheme.red,
+                    pill: { fg: "#111111", fill: currentTheme.gold, stroke: "transparent" },
+                    pillCurrent: { fg: "#FFFFFF", fill: currentTheme.red, stroke: "transparent" }
+                },
+                pill: { fontSize: 16, padX: 16, padY: 8, radius: 999 },
+                pulse: { speedMs: 1500, maxScale: 3, baseRadiusPx: 4, alpha: 0.4 },
+                idleMs: 10000,
+                homeView: { bounds: [[90, -12], [150, 50]], padding: { top: 60, right: 200, bottom: 60, left: 200 }, maxZoom: 6.5 }
+            };
+        }
+
+        // Inject config for bundle.iife.js
+        function updateWindowConfig() {
+            const CFG = getCFG();
+            window.TRIPMAP_CONFIG = {
+                MAPTILER_KEY: CFG.maptiler.key,
+                MAP_ID: CFG.maptiler.mapId
+            };
+            window.__TRIP_INLINE_CONFIG__ = CFG;
+        }
+
+        // Create dynamic trip-stops element for the bundle
+        function injectStopsScript() {
+            let el = document.getElementById('trip-stops');
+            if (el) el.remove();
+
+            el = document.createElement('script');
+            el.type = 'application/json';
+            el.id = 'trip-stops';
+            el.textContent = JSON.stringify(stops);
+            document.body.appendChild(el);
+        }
+
+        // Also inject trip-config for the bundle
+        function injectConfigScript() {
+            let el = document.getElementById('trip-config');
+            if (!el) {
+                el = document.createElement('script');
+                el.type = 'application/json';
+                el.id = 'trip-config';
+                document.body.appendChild(el);
+            }
+            el.textContent = JSON.stringify(getCFG());
+        }
+
+        function refreshMap() {
+            // Update window config with current theme
+            updateWindowConfig();
+
+            // Rebuild map by removing and re-adding
+            if (map) {
+                map.remove();
+                map = null;
+            }
+
+            injectStopsScript();
+            injectConfigScript();
+
+            // Reload the bundle by creating a fresh script
+            const oldScript = document.querySelector('script[src*="bundle.iife.js"]');
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement('script');
+            script.src = './s/bundle.iife.js?' + Date.now(); // Cache bust
+            document.body.appendChild(script);
+        }
+
+        // =====================================================
+        // INIT
+        // =====================================================
+        initializeStops();
+    </script>
+</body>
+
+</html>

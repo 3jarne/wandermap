@@ -1,0 +1,211 @@
+<style>
+  .sqs-block-code:has(#trip-map),
+  .sqs-block-code:has(#trip-map) .sqs-block-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .sqs-section:has(#trip-map) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* one knob for height; change 520px to whatever you want */
+  #wf-map-wrap {
+    width: 100%;
+    height: 520px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #trip-map {
+    width: 100%;
+    height: 100%;
+    border-radius: 25px;
+  }
+
+  .fe-68d11cf9395e8a0eb76247cb {
+    --inset-padding: none !important;
+  }
+</style>
+
+<div id="wf-map-wrap">
+  <div id="trip-map"></div>
+</div>
+<div id="trip-map-status" style="font:14px/1.4 'IBM Plex Mono',monospace;margin-top:6px;"></div>
+
+<!-- Inline CONFIG (no fetch) -->
+<script type="application/json" id="trip-config">
+{
+  "maptiler": { "key": "PGWEY6eweJyLp2h6U2Hj", "mapId": "01992c70-b269-7a66-af7e-a3da0109a2bb" },
+  "icons": { "root": "/s/", "iconSize": 16, "badgeSize": 32 },
+  "colors": {
+    "route": "#FFB12D", "currentDot": "#A64C4F",
+    "pill": { "fg": "#111111", "fill": "#FFB12D", "stroke": "transparent" },
+    "pillCurrent": { "fg": "#FFFFFF", "fill": "#A64C4F", "stroke": "transparent" }
+  },
+  "pill": { "fontSize": 16, "padX": 16, "padY": 8, "radius": 999 },
+  "pulse": { "speedMs": 1500, "maxScale": 3, "baseRadiusPx": 4, "alpha": 0.4 },
+  "idleMs": 10000,
+  "homeView": { "bounds": [[90,-12],[150,50]], "padding": { "top":60,"right":200,"bottom":60,"left":200 }, "maxZoom": 6.5 }
+}
+</script>
+
+<!-- Bridge: move inline config into window.TRIPMAP_CONFIG before the bundle loads -->
+<script>
+  (function () {
+    var el = document.getElementById('trip-config');
+    if (!el) return;
+    try {
+      var cfg = JSON.parse(el.textContent || "{}");
+      window.TRIPMAP_CONFIG = {
+        MAPTILER_KEY: (cfg.maptiler && cfg.maptiler.key) || "",
+        MAP_ID: (cfg.maptiler && cfg.maptiler.mapId) || "landscape"
+      };
+      // stash full config for the bundle to read from inline (no fetch)
+      window.__TRIP_INLINE_CONFIG__ = cfg;
+    } catch (e) { }
+  })();
+</script>
+
+<!-- Inline STOPS (no fetch) -->
+<script type="application/json" id="trip-stops">
+[
+  {
+    "name": "Hurdal, Norway",
+    "lon": 11.0726,
+    "lat": 60.4230,
+    "arrive": "2025-07-30",
+    "depart": "2025-07-30",
+    "to": "car"
+  },
+  {
+    "name": "Oslo, Norway",
+    "lon": 10.7522,
+    "lat": 59.9139,
+    "arrive": "2025-07-30",
+    "depart": "2025-08-04",
+    "to": "plane"
+  },
+  {
+    "name": "Beijing, China",
+    "lon": 116.4074,
+    "lat": 39.9042,
+    "arrive": "2025-08-05",
+    "depart": "2025-08-09",
+    "to": "train"
+  },
+  {
+    "name": "Pingyao, China",
+    "lon": 112.1741,
+    "lat": 37.2026,
+    "arrive": "2025-08-10",
+    "depart": "2025-08-11",
+    "to": "train"
+  },
+  {
+    "name": "Xi’an, China",
+    "lon": 108.9398,
+    "lat": 34.3416,
+    "arrive": "2025-08-12",
+    "depart": "2025-08-15",
+    "to": "train"
+  },
+  {
+    "name": "Chengdu, China",
+    "lon": 104.0665,
+    "lat": 30.5728,
+    "arrive": "2025-08-16",
+    "depart": "2025-08-19",
+    "to": "plane"
+  },
+  {
+    "name": "Shanghai, China",
+    "lon": 121.4737,
+    "lat": 31.2304,
+    "arrive": "2025-08-20",
+    "depart": "2025-08-28",
+    "to": "plane"
+  },
+  {
+    "name": "Busan, South Korea",
+    "lon": 129.0756,
+    "lat": 35.1796,
+    "arrive": "2025-08-28",
+    "depart": "2025-08-31",
+    "to": "train"
+  },
+  {
+    "name": "Seoul, South Korea",
+    "lon": 126.9780,
+    "lat": 37.5665,
+    "arrive": "2025-08-31",
+    "depart": "2025-09-16",
+    "to": "plane"
+  },
+  {
+  "name": "Seogwipo, South Korea",
+  "lon": 126.5610,
+  "lat": 33.2530,
+  "arrive": "2025-09-16",
+  "depart": "2025-09-30",
+  "to": "plane"
+},
+{
+  "name": "Sanur, Indonesia",
+  "lon": 115.2620,
+  "lat": -8.6950,
+  "arrive": "2025-09-30",
+  "depart": "2025-10-04",
+  "to": "boat"
+},
+{
+  "name": "Mushroom Bay, Indonesia",
+  "lon": 115.4527,
+  "lat": -8.6880,
+  "arrive": "2025-10-04",
+  "depart": "2025-10-11",
+  "to": "boat"
+},
+  {
+    "name": "Kuta, Indonesia",
+    "lon": 115.1690,
+    "lat": -8.7170,
+    "arrive": "2025-10-11",
+    "depart": "2025-10-13",
+    "to": "car"
+  },
+  {
+    "name": "Kuala Lumpur, Malaysia",
+    "lon": 101.7069,
+    "lat": 3.1579,
+    "arrive": "2025-10-13",
+    "depart": "2025-10-20",
+    "to": "plane"
+  },
+  {
+    "name": "Kuta, Indonesia",
+    "lon": 115.1690,
+    "lat": -8.7170,
+    "arrive": "2025-10-20",
+    "depart": "2025-10-22",
+    "to": "car"
+  },
+  {
+    "name": "Ubud, Indonesia",
+    "lon": 115.2625,
+    "lat": -8.5069,
+    "arrive": "2025-10-22",
+    "depart": "2025-11-08",
+    "to": "car"
+  }
+]
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.js"></script>
+
+<!-- Your bundle (no data-config / data-json needed) -->
+<script src="/s/bundleiife.js"></script>

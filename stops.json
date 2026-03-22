@@ -1,0 +1,218 @@
+[
+  {
+    "name": "Hurdal, Norway",
+    "lon": 11.0726,
+    "lat": 60.423,
+    "arrive": "2025-07-30",
+    "depart": "2025-07-30",
+    "to": "car"
+  },
+  {
+    "name": "Oslo, Norway",
+    "lon": 10.7522,
+    "lat": 59.9139,
+    "arrive": "2025-07-30",
+    "depart": "2025-08-04",
+    "to": "plane"
+  },
+  {
+    "name": "Beijing, China",
+    "lon": 116.4074,
+    "lat": 39.9042,
+    "arrive": "2025-08-05",
+    "depart": "2025-08-09",
+    "to": "train"
+  },
+  {
+    "name": "Pingyao, China",
+    "lon": 112.1741,
+    "lat": 37.2026,
+    "arrive": "2025-08-10",
+    "depart": "2025-08-11",
+    "to": "train"
+  },
+  {
+    "name": "Xi'an, China",
+    "lon": 108.9398,
+    "lat": 34.3416,
+    "arrive": "2025-08-12",
+    "depart": "2025-08-15",
+    "to": "train"
+  },
+  {
+    "name": "Chengdu, China",
+    "lon": 104.0665,
+    "lat": 30.5728,
+    "arrive": "2025-08-16",
+    "depart": "2025-08-19",
+    "to": "plane"
+  },
+  {
+    "name": "Shanghai, China",
+    "lon": 121.4737,
+    "lat": 31.2304,
+    "arrive": "2025-08-20",
+    "depart": "2025-08-28",
+    "to": "plane"
+  },
+  {
+    "name": "Busan, South Korea",
+    "lon": 129.0756,
+    "lat": 35.1796,
+    "arrive": "2025-08-28",
+    "depart": "2025-08-31",
+    "to": "train"
+  },
+  {
+    "name": "Seoul, South Korea",
+    "lon": 126.978,
+    "lat": 37.5665,
+    "arrive": "2025-08-31",
+    "depart": "2025-09-16",
+    "to": "plane"
+  },
+  {
+    "name": "Seogwipo, South Korea",
+    "lon": 126.561,
+    "lat": 33.253,
+    "arrive": "2025-09-16",
+    "depart": "2025-09-30",
+    "to": "plane"
+  },
+  {
+    "name": "Sanur, Bali, Indonesia",
+    "lon": 115.262,
+    "lat": -8.695,
+    "arrive": "2025-09-30",
+    "depart": "2025-10-04",
+    "to": "boat"
+  },
+  {
+    "name": "Mushroom Bay, Bali, Indonesia",
+    "lon": 115.4527,
+    "lat": -8.688,
+    "arrive": "2025-10-04",
+    "depart": "2025-10-11",
+    "to": "boat"
+  },
+  {
+    "name": "Kuta, Bali, Indonesia",
+    "lon": 115.169,
+    "lat": -8.717,
+    "arrive": "2025-10-11",
+    "depart": "2025-10-13",
+    "to": "car"
+  },
+  {
+    "name": "Kuala Lumpur, Malaysia",
+    "lon": 101.7069,
+    "lat": 3.1579,
+    "arrive": "2025-10-13",
+    "depart": "2025-10-20",
+    "to": "plane"
+  },
+  {
+    "name": "Kuta, Bali, Indonesia",
+    "lon": 115.169,
+    "lat": -8.717,
+    "arrive": "2025-10-20",
+    "depart": "2025-10-22",
+    "to": "car"
+  },
+  {
+    "name": "Ubud, Bali, Indonesia",
+    "lon": 115.2625,
+    "lat": -8.5069,
+    "arrive": "2025-10-22",
+    "depart": "2025-11-08",
+    "to": "boat"
+  },
+  {
+    "name": "Gili Air, Lombok, Indonesia",
+    "lon": 116.081162,
+    "lat": -8.3577073,
+    "arrive": "2025-11-08",
+    "depart": "2025-11-12",
+    "to": "boat"
+  },
+  {
+    "name": "Kuta, Lombok, Indonesia",
+    "lon": 116.2840335,
+    "lat": -8.8559729,
+    "arrive": "2025-11-12",
+    "depart": "2025-11-17",
+    "to": "plane"
+  },
+  {
+    "name": "Bangkok, Thailand",
+    "lon": 100.4935089,
+    "lat": 13.7524938,
+    "arrive": "2025-11-17",
+    "depart": "2025-11-27",
+    "to": "plane"
+  },
+  {
+    "name": "Roi Et, Thailand",
+    "lon": 103.6514286,
+    "lat": 16.0568089,
+    "arrive": "2025-11-27",
+    "depart": "2025-12-11",
+    "to": "plane"
+  },
+  {
+    "name": "Chiang Mai, Thailand",
+    "lon": 98.9858802,
+    "lat": 18.7882778,
+    "arrive": "2025-12-11",
+    "depart": "2025-12-20",
+    "to": "plane"
+  },
+  {
+    "name": "Roi Et, Thailand",
+    "lon": 103.6514286,
+    "lat": 16.0568089,
+    "arrive": "2025-12-20",
+    "depart": "2026-01-26",
+    "to": "plane"
+  },
+  {
+    "name": "Bangkok, Thailand",
+    "lon": 100.4935089,
+    "lat": 13.7524938,
+    "arrive": "2026-01-26",
+    "depart": "2026-02-02",
+    "to": "plane"
+  },
+  {
+    "name": "Hua Hin",
+    "lon": 99.9573437,
+    "lat": 12.5699326,
+    "arrive": "2026-02-02",
+    "depart": "2026-02-14",
+    "to": "train"
+  },
+  {
+    "name": "Bangkok, Thailand",
+    "lon": 100.4935089,
+    "lat": 13.7524938,
+    "arrive": "2026-02-14",
+    "depart": "2026-02-15",
+    "to": "train"
+  },
+  {
+    "name": "Ho Chi Minh City, Vietnam",
+    "lon": 106.7021047,
+    "lat": 10.7755254,
+    "arrive": "2026-02-15",
+    "depart": "2026-02-17",
+    "to": "plane"
+  },
+  {
+    "name": "Hà Nội, Vietnam",
+    "lon": 105.854041,
+    "lat": 21.0283334,
+    "arrive": "2026-02-17",
+    "depart": "",
+    "to": "plane"
+  }
+]
