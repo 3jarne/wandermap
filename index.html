@@ -478,7 +478,7 @@
 
         #trip-map {
             width: 100%;
-            height: 520px;
+            height: 100%;
             border-radius: 25px;
         }
 
@@ -819,8 +819,23 @@
             }
 
             /* ---- Mobile Tabs ---- */
+            #editor {
+                height: 100vh;
+                height: 100dvh;
+                overflow: hidden;
+            }
+
+            #editor h1 {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+
             #editor-tabs {
                 display: flex !important;
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
 
             .tab-panel {
@@ -833,7 +848,18 @@
             }
 
             #tab-preview.active {
-                min-height: 60vh;
+                flex: 1;
+                min-height: 0;
+            }
+
+            #tab-preview #wf-map-wrap {
+                flex: 1;
+            }
+
+            #tab-preview #trip-map {
+                height: 100%;
+                max-height: none;
+                min-height: 0;
             }
 
             #tab-settings.active {
